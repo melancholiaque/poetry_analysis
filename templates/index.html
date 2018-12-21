@@ -1,0 +1,16 @@
+<html>
+    <head>
+        <title> asd </title>
+    </head>
+    <body>
+        <form method="post" id="poem_form">
+            {% csrf_token %}
+            <label>Type your poem</label>
+            <br>
+            <textarea name="poem" form="poem_form"></textarea>
+            <br>
+            <input type="submit">
+        </form>
+        {% if poet %} You write like {{ poet }} {% endif %}
+    </body>
+</html>
