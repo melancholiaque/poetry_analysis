@@ -5,7 +5,12 @@ from .models import Poem
 from random import choice
 
 
-pipe = pipeline.load_from('pickled_objects/estimator.pkl')
+try:
+    pipe = pipeline.load_from('pickled_objects/estimator.pkl')
+except FileNotFoundError:
+    print('you running app without estimator '
+          'create one with "python manage.py train_and_serialize'
+          ' pickled_objects/estimator.pkl"')
 
 
 class Home(View):
