@@ -1,51 +1,32 @@
+import pickle
 import re
-from nltk.stem import PorterStemmer
-from sklearn.preprocessing import LabelEncoder
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.ensemble import VotingClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.decomposition import TruncatedSVD
-from sklearn.feature_extraction.text import TfidfVectorizer
-import numpy as np
-from .models import Poem
 
 
-ps = PorterStemmer()
-le = LabelEncoder()
-pca = TruncatedSVD(n_components=150)
-vec = TfidfVectorizer()
+class pipeline:
 
-rfc = RandomForestClassifier(n_estimators=150, criterion='gini')
-mlp = MLPClassifier(hidden_layer_sizes=(50, 50), max_iter=1000)
-svm = SVC(kernel='rbf', C=2, gamma=2)
-estimators = [
-           ('svm', svm),
-           ('mlp', mlp),
-           ('rfc', rfc)
-]
-vc = VotingClassifier(estimators=estimators, voting='hard')
+    def __init__(self, stemmer, vec, svd, vc, le):
+        self.stemmer = stemmer
+        self.vec = vec
+        self.svd = svd
+        self.vc = vc
+        self.le = le
 
-poems = Poem.objects.all()
-content = np.array([p.content for p in poems])
-poets = np.array([p.poet.name for p in poems])
+    def predict(self, poem):
+        pp = self.stemmer.stem(self.clean(poem))
+        val = self.svd.transform(self.vec.transform([f'{pp} ']))
+        return self.le.inverse_transform(self.vc.predict(val))
 
-y = le.fit_transform(poets)
-X = vec.fit_transform(content)
-X = pca.fit_transform(X)
+    def clean(self, string):
+        for char in ['\r', '\n', '-', ',', '.', ';', '(', ')']:
+            string = string.replace(char, ' ')
+        return re.sub('\s+', ' ', string)
 
-svm.fit(X, y)
-mlp.fit(X, y)
-rfc.fit(X, y)
-vc.fit(X, y)
+    def dump_to(self, path):
+        with open(path, 'wb') as fd:
+            pickle.dump(self, fd, pickle.DEFAULT_PROTOCOL)
 
-
-def clean(string):
-    for char in ['\r', '\n', '-', ',', '.', ';']:
-        string = string.replace(char, ' ')
-    return re.sub('\s+', ' ', string)
-
-
-def predict(string):
-    return le.inverse_transform(rfc.predict(
-        pca.transform(vec.transform([ps.stem(clean(string))]))))
+    @staticmethod
+    def load_from(path):
+        with open(path, 'rb') as fd:
+            obj = pickle.load(fd, )
+        return obj

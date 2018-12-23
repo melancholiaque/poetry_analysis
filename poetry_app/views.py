@@ -1,8 +1,11 @@
 from django.shortcuts import render
 from django.views import View
-from .services import predict
+from .services import pipeline
 from .models import Poem
 from random import choice
+
+
+pipe = pipeline.load_from('pickled_objects/estimator.pkl')
 
 
 class Home(View):
@@ -15,7 +18,7 @@ class Home(View):
     def post(self, request):
         poem = request.POST.get('poem', None)
         if poem:
-            poet = predict(poem)[0]
+            poet = pipe.predict(poem)[0]
             poem = choice(Poem.objects.filter(poet__name=poet))
             return render(request, self.template_name,
                           {'poet': poet, 'poem': poem})
