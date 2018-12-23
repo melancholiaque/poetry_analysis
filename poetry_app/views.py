@@ -18,7 +18,8 @@ class Home(View):
     template_name = 'index.html'
 
     def get(self, request):
-        return render(request, self.template_name, {'poet': None, 'poem': None})
+        return render(request, self.template_name,
+                      {'poet': None, 'poem': None})
 
     def post(self, request):
         poem = request.POST.get('poem', None)
@@ -27,3 +28,5 @@ class Home(View):
             poem = choice(Poem.objects.filter(poet__name=poet))
             return render(request, self.template_name,
                           {'poet': poet, 'poem': poem})
+        return render(request, self.template_name,
+                      {'poet': None, 'poem': None})
