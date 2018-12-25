@@ -10,7 +10,7 @@ try:
 except FileNotFoundError:
     print('you running app without estimator '
           'create one with "python manage.py train_and_serialize'
-          ' pickled_objects/estimator.pkl"')
+          ' <threshold>"')
 
 
 class Home(View):
