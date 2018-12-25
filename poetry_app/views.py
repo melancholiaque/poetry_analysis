@@ -23,7 +23,8 @@ class Home(View):
 
     def post(self, request):
         poem = request.POST.get('poem', None)
-        if poem:
+        if poem and all(c in 'qwertyuiopasdfghjklzxcvbnm'
+                      for c in filter(str.isalpha, poem)):
             poet = pipe.predict(poem)[0]
             poem = choice(Poem.objects.filter(poet__name=poet))
             return render(request, self.template_name,
